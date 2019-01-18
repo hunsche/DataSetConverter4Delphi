@@ -7,7 +7,7 @@ uses
   System.DateUtils,
   System.JSON,
   Data.DB,
-  DataSetConverter4D;
+  DataSetConverter4D.Intf;
 
 function DateTimeToISOTimeStamp(const dateTime: TDateTime): string;
 function DateToISODate(const date: TDateTime): string;

@@ -3,54 +3,79 @@ unit DataSetConverter4D;
 interface
 
 uses
-  System.SysUtils,
   System.JSON,
-  Data.DB;
+  Data.DB,
+  DataSetConverter4D.Intf,
+  DataSetConverter4D.Impl;
 
 type
 
-  EDataSetConverterException = class(Exception);
 
-  TBooleanFieldType = (bfUnknown, bfBoolean, bfInteger);
-  TDataSetFieldType = (dfUnknown, dfJSONObject, dfJSONArray);
-
-  IDataSetConverter = interface
-    ['{8D995E50-A1DC-4426-A603-762E1387E691}']
-    function Source(dataSet: TDataSet): IDataSetConverter; overload;
-    function Source(dataSet: TDataSet; const owns: Boolean): IDataSetConverter; overload;
-
+  TDataSetConverterHelper = class helper for TDataSet
+  public
     function AsJSONObject: TJSONObject;
     function AsJSONArray: TJSONArray;
-    function AsJSONStructure: TJSONArray;
-  end;
 
-  IJSONConverter = interface
-    ['{1B020937-438E-483F-ACB1-44B8B2707500}']
-    function Source(json: TJSONObject): IJSONConverter; overload;
-    function Source(json: TJSONObject; const owns: Boolean): IJSONConverter; overload;
+    function AsJSONObjectString: string;
+    function AsJSONArrayString: string;
 
-    function Source(json: TJSONArray): IJSONConverter; overload;
-    function Source(json: TJSONArray; const owns: Boolean): IJSONConverter; overload;
+    procedure FromJSONObject(json: TJSONObject);
+    procedure FromJSONArray(json: TJSONArray);
 
-    procedure ToDataSet(dataSet: TDataSet);
-    procedure ToRecord(dataSet: TDataSet);
-    procedure ToStructure(dataSet: TDataSet);
-  end;
-
-  IConverter = interface
-    ['{52A3BE1E-5116-4A9A-A7B6-3AF0FCEB1D8E}']
-    function DataSet: IDataSetConverter; overload;
-    function DataSet(dataSet: TDataSet): IDataSetConverter; overload;
-    function DataSet(dataSet: TDataSet; const owns: Boolean): IDataSetConverter; overload;
-
-    function JSON: IJSONConverter; overload;
-    function JSON(json: TJSONObject): IJSONConverter; overload;
-    function JSON(json: TJSONObject; const owns: Boolean): IJSONConverter; overload;
-
-    function JSON(json: TJSONArray): IJSONConverter; overload;
-    function JSON(json: TJSONArray; const owns: Boolean): IJSONConverter; overload;
+    procedure RecordFromJSONObject(json: TJSONObject);
   end;
 
 implementation
+
+{ TDataSetConverterHelper }
+
+function TDataSetConverterHelper.AsJSONArray: TJSONArray;
+begin
+  Result := TConverter.New.DataSet(Self).AsJSONArray;
+end;
+
+function TDataSetConverterHelper.AsJSONArrayString: string;
+var
+  ja: TJSONArray;
+begin
+  ja := Self.AsJSONArray;
+  try
+    Result := ja.ToString;
+  finally
+    ja.Free;
+  end;
+end;
+
+function TDataSetConverterHelper.AsJSONObject: TJSONObject;
+begin
+  Result := TConverter.New.DataSet(Self).AsJSONObject;
+end;
+
+function TDataSetConverterHelper.AsJSONObjectString: string;
+var
+  jo: TJSONObject;
+begin
+  jo := Self.AsJSONObject;
+  try
+    Result := jo.ToString;
+  finally
+    jo.Free;
+  end;
+end;
+
+procedure TDataSetConverterHelper.FromJSONArray(json: TJSONArray);
+begin
+  TConverter.New.JSON(json).ToDataSet(Self);
+end;
+
+procedure TDataSetConverterHelper.FromJSONObject(json: TJSONObject);
+begin
+  TConverter.New.JSON(json).ToDataSet(Self);
+end;
+
+procedure TDataSetConverterHelper.RecordFromJSONObject(json: TJSONObject);
+begin
+  TConverter.New.JSON(json).ToRecord(Self);
+end;
 
 end.

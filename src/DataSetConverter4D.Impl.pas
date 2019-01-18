@@ -12,7 +12,7 @@ uses
   Data.SqlTimSt,
   Data.FmtBcd,
   Data.DB,
-  DataSetConverter4D,
+  DataSetConverter4D.Intf,
   DataSetConverter4D.Util;
 
 type
